@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Jump Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <script src="game.js"></script>
+</body>
+</html>
+const canvas = document.getElementById('gameCanvas');
+const context = canvas.getContext('2d');
+
+const player = {
+    x: 200,
+    y: 500,
+    width: 50,
+    height: 50,
+    color: 'blue',
+    dy: 0
+};
+
+const platforms = [];
+const platformCount = 6;
+const platformWidth = 60;
+const platformHeight = 10;
+const platformSpacing = 100;
+
+for (let i = 0; i < platformCount; i++) {
+    platforms.push({
+        x: Math.random() * (canvas.width - platformWidth),
+        y: i * platformSpacing,
+        width: platformWidth,
+        height: platformHeight,
+        color: 'green'
+    });
+}
+
+function update() {
+    player.dy += 0.5;
+    player.y += player.dy;
+
+    if (player.y + player.height > canvas.height) {
+        player.y = canvas.height - player.height;
+        player.dy = -10;
+    }
+
+    platforms.forEach(platform => {
+        if (player.y + player.height > platform.y &&
+            player.y + player.height < platform.y + platform.height &&
+            player.x + player.width > platform.x &&
+            player.x < platform.x + platform.width &&
+            player.dy > 0) {
+            player.dy = -10;
+        }
+    });
+
+    if (player.y < canvas.height / 2) {
+        platforms.forEach(platform => {
+            platform.y += 5;
+            if (platform.y > canvas.height) {
+                platform.y = 0;
+                platform.x = Math.random() * (canvas.width - platformWidth);
+            }
+        });
+        player.y += 5;
+    }
+}
+
+function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = player.color;
+    context.fillRect(player.x, player.y, player.width, player.height);
+
+    platforms.forEach(platform => {
+        context.fillStyle = platform.color;
+        context.fillRect(platform.x, platform.y, platform.width, platform.height);
+    });
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
